@@ -62,7 +62,6 @@ $.getJSON(location.pathname, page: 2).done (result) ->
   console.log result.html # => '<div class="page2"></div>'
 ```
 
-
 ### MockApi.restore()
 
 Restores mocked method.
@@ -73,5 +72,4 @@ initialMethod = $.getJSON
 $.getJSON is initialMehod # => false
 @getJSON.restore()
 $.getJSON is initialMethod # => true
-
 ```
