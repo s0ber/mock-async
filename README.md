@@ -10,7 +10,7 @@ Just mock an asynchronous method with this simple function.
 @getJSON = mockAsync($, 'getJSON')
 ```
 
-The first argument here is an object, and the second one is method name. Mocked method API will be returned. Here we've saved reference to it with ```getJSON``` variable.
+The first argument here is an object, and the second one is method name. Mocked method API will be returned. Here we've saved reference to it with ```@getJSON``` variable.
 
 ## Mock API
 
@@ -70,6 +70,7 @@ Restores mocked method.
 initialMethod = $.getJSON
 @getJSON = mockAsync($, 'getJSON')
 $.getJSON is initialMehod # => false
+
 @getJSON.restore()
 $.getJSON is initialMethod # => true
 ```
