@@ -1,66 +1,77 @@
-My Library Template
+Mock Async
 =====
-[![Build Status](https://travis-ci.org/s0ber/bower-template.png?branch=master)](https://travis-ci.org/s0ber/bower-template)
+[![Build Status](https://travis-ci.org/s0ber/mock-async.png?branch=master)](https://travis-ci.org/s0ber/mock-async)
 
-## Usage
+## How to use
 
-### Basic preparation
+Just mock an asynchronous method with this simple function.
 
-Clone this repo, rename it, remove git files. Install **gulp** and **bower**, and **coffeegulp** to easily run gulp tasks with ```gulp.coffee```.
-
-```
-cd ~/my_projects
-git clone git@github.com:s0ber/bower-template.git
-mv bower-template my_awesome_lib
-cd my_awesome_lib
-rm -rf .git
-
-npm install -g gulp
-npm install -g bower
-npm install -g coffeegulp
-npm install
-bower install
+```coffeescript
+@getJSON = mockAsync($, 'getJSON')
 ```
 
-Edit ```package.json``` and ```bower.json``` with required data.
+The first argument here is an object, and the second one is method name. Mocked method API will be returned. Here we've saved reference to it with ```getJSON``` variable.
 
-### Testing
+## Mock API
 
-Run specs in development mode (all file changes will be watched).
+Than we can make our mocked method to do what we want from it to do.
 
-```
-coffeegulp karma:dev
-```
+### MockApi.shouldReturn(callback or value)
 
-You can also sync your TravisCI account and turn on builds for your repo.
+Makes mocked method to return specified result by default.
 
-### Releasing
+```coffeescript
+@getJSON = mockAsync($, 'getJSON')
 
-If you want to release a new version of your plugin, at first, edit associated ```package.json``` and ```bower.json``` files, then perform the following task.
-
-```
-coffeegulp release
+@getJSON.shouldReturn '5'
+$.getJSON().done (result) ->
+  console.log result # => 5
 ```
 
-It will at first run your specs. If they'll pass, concatenated compiled version of your source files will be created, and also minified one in **build/** folder.
+You can provide callback, so, result will be calculated, based on callback's returned value.
 
+```coffeescript
+a = 5, b = 3
+@getJSON = mockAsync($, 'getJSON')
 
-### Modula
-
-Modula is a very simple 15-lines packages manager. It helps you to get your code organised. It doesn't worth to make a library of it, because it's so straightforward. So, it's just included by default.
-
-```
-modula.exports('package_name', ReferenceToPackage)
-modula.exports('package_name/file', ReferenceToPackageFile)
-
-MyPackage = modula.require 'package_name'
-MyPackageSourceFile = modula.require 'package_name/file'
+@getJSON.shouldReturn -> a + b
+$.getJSON().done (result) ->
+  console.log result # => 8
 ```
 
-### Source files
+### MockApi.whenCalledWith(arguments...).shouldReturn(callback or value)
 
-You should list your source files in ```gulpfile.coffee```, gulp will use them for building compiled version, and karma will use them for running specs.
+You can make mocked method to return different results based on provided to this method arguments.
 
-### License
+```coffeescript
+@getJSON = mockAsync($, 'getJSON')
 
-Don't forget to edit LICENSE file before the release.
+@getJSON.whenCalledWith(location.pathname).shouldReturn
+  html: '<div class="page1"></div>'
+
+@getJSON.whenCalledWith(location.pathname, page: 1).shouldReturn
+  html: '<div class="page1"></div>'
+
+@getJSON.whenCalledWith(location.pathname, page: 2).shouldReturn
+  html: '<div class="page2"></div>'
+
+$.getJSON(location.pathname, page: 1).done (result) ->
+  console.log result.html # => '<div class="page1"></div>'
+
+$.getJSON(location.pathname, page: 2).done (result) ->
+  console.log result.html # => '<div class="page2"></div>'
+```
+
+
+### MockApi.restore()
+
+Restores mocked method.
+
+```coffeescript
+initialMethod = $.getJSON
+@getJSON = mockAsync($, 'getJSON')
+$.getJSON is initialMehod # => false
+@getJSON.restore()
+$.getJSON is initialMethod # => true
+
+```
