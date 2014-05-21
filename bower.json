@@ -1,0 +1,23 @@
+{
+  "name": "mock-async",
+  "version": "0.1.0",
+  "homepage": "https://github.com/s0ber/mock-async",
+  "authors": [
+    "Sergey Shishkalov <sergeyshishkalov@gmail.com>"
+  ],
+  "description": "Simple one-method library for mocking asynchronous methods",
+  "main": "build/mock-async.min.js",
+
+  "dependencies": {
+    "jquery": "",
+    "underscore": ""
+  },
+
+  "license": "MIT",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
