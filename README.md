@@ -68,6 +68,7 @@ Restores mocked method.
 
 ```coffeescript
 initialMethod = $.getJSON
+
 @getJSON = mockAsync($, 'getJSON')
 $.getJSON is initialMehod # => false
 
