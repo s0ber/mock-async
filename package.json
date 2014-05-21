@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "mock-async",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Sergey Shishkalov <sergeyshishkalov@gmail.com>",
   "description": "Simple one-method library for mocking asynchronous methods",
   "devDependencies": {

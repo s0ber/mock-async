@@ -1,4 +1,4 @@
-/*! mock-async (v0.1.0),
+/*! mock-async (v0.1.1),
  Simple one-method library for mocking asynchronous methods,
  by Sergey Shishkalov <sergeyshishkalov@gmail.com>
  Wed May 21 2014 */
