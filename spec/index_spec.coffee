@@ -2,6 +2,7 @@ MockApi = modula.require 'mock_api'
 
 describe 'MockApi', ->
   beforeEach ->
+    @result = null
     @sourceMethod = $.getJSON
     @mockedMethodApi = new MockApi($, 'getJSON')
 
@@ -22,51 +23,75 @@ describe 'MockApi', ->
   describe 'MockApi#shouldReturn', ->
     it 'makes mocked method to return specified value on resolving (when called)', ->
       @mockedMethodApi.shouldReturn 'ololo'
-      $.getJSON().done (result) ->
-        expect(result).to.be.eql 'ololo'
+      $.getJSON().done (@result) =>
+      expect(@result).to.be.eql 'ololo'
 
     it 'makes mocked method to return callback result on resolving if callback provided', ->
       @mockedMethodApi.shouldReturn -> 'ololo'
-      $.getJSON().done (result) ->
-        expect(result).to.be.eql 'ololo'
+      $.getJSON().done (@result) =>
+      expect(@result).to.be.eql 'ololo'
+
+  describe 'MockApi#shouldSucceed', ->
+    it 'makes mocked method to return specified value on resolving (when called)', ->
+      @mockedMethodApi.shouldSucceed 'ololo'
+      $.getJSON().done (@result) =>
+      expect(@result).to.be.eql 'ololo'
+
+    it 'makes mocked method to return callback result on resolving if callback provided', ->
+      @mockedMethodApi.shouldSucceed -> 'ololo'
+      $.getJSON().done (@result) =>
+      expect(@result).to.be.eql 'ololo'
+
+  describe 'MockApi#shouldFail', ->
+    it 'makes mocked method to return specified value on rejecting (when called)', ->
+      @mockedMethodApi.shouldFail 'ololo'
+      $.getJSON().fail (@result) =>
+      expect(@result).to.be.eql 'ololo'
+
+    it 'makes mocked method to return callback result on rejecting if callback provided', ->
+      @mockedMethodApi.shouldFail -> 'ololo'
+      $.getJSON().fail (@result) =>
+      expect(@result).to.be.eql 'ololo'
 
   describe 'MockApi#whenCalledWith', ->
     it 'makes mocked method to return specified value when called with specified string argument', ->
-      @mockedMethodApi.shouldReturn 'ololo'
-      @mockedMethodApi.whenCalledWith('custom_path').shouldReturn 'pish-pish'
-      @mockedMethodApi.whenCalledWith('another_custom_path').shouldReturn 'hmm'
+      @mockedMethodApi
+        .shouldReturn 'ololo'
+        .whenCalledWith('custom_path').shouldReturn 'pish-pish'
+        .whenCalledWith('another_custom_path').shouldReturn 'hmm'
 
-      $.getJSON().done (result) ->
-        expect(result).to.be.eql 'ololo'
+      $.getJSON().done (@result) =>
+      expect(@result).to.be.eql 'ololo'
 
-      $.getJSON('custom_path').done (result) ->
-        expect(result).to.be.eql 'pish-pish'
+      $.getJSON('custom_path').done (@result) =>
+      expect(@result).to.be.eql 'pish-pish'
 
-      $.getJSON('another_custom_path').done (result) ->
-        expect(result).to.be.eql 'hmm'
+      $.getJSON('another_custom_path').done (@result) =>
+      expect(@result).to.be.eql 'hmm'
 
-      $.getJSON('unmocked_custom_path').done (result) ->
-        expect(result).to.be.eql 'ololo'
+      $.getJSON('unmocked_custom_path').done (@result) =>
+      expect(@result).to.be.eql 'ololo'
 
     it 'makes mocked method to return callback result when called with specified string argument if callback is provided', ->
       @mockedMethodApi.whenCalledWith('custom_path').shouldReturn -> 'pish-pish'
-      $.getJSON('custom_path').done (result) ->
-        expect(result).to.be.eql 'pish-pish'
+      $.getJSON('custom_path').done (@result) =>
+      expect(@result).to.be.eql 'pish-pish'
 
     it 'makes mocked method to return specified value when called with specified set of arguments', ->
-      @mockedMethodApi.shouldReturn 'ololo'
-      @mockedMethodApi.whenCalledWith('custom_path', a: 1).shouldReturn 'pish-pish'
-      @mockedMethodApi.whenCalledWith('another_custom_path', a: 2).shouldReturn 'hmm'
-      @mockedMethodApi.whenCalledWith('another_custom_path', a: 1, b: 2).shouldReturn 'another string'
+      @mockedMethodApi
+        .shouldReturn 'ololo'
+        .whenCalledWith('custom_path', a: 1).shouldReturn 'pish-pish'
+        .whenCalledWith('another_custom_path', a: 2).shouldReturn 'hmm'
+        .whenCalledWith('another_custom_path', a: 1, b: 2).shouldReturn 'another string'
 
-      $.getJSON('custom_path', a: 1).done (result) ->
-        expect(result).to.be.eql 'pish-pish'
+      $.getJSON('custom_path', a: 1).done (@result) =>
+      expect(@result).to.be.eql 'pish-pish'
 
-      $.getJSON('another_custom_path', a: 2).done (result) ->
-        expect(result).to.be.eql 'hmm'
+      $.getJSON('another_custom_path', a: 2).done (@result) =>
+      expect(@result).to.be.eql 'hmm'
 
-      $.getJSON('another_custom_path', a: 1, b: 2).done (result) ->
-        expect(result).to.be.eql 'another string'
+      $.getJSON('another_custom_path', a: 1, b: 2).done (@result) =>
+      expect(@result).to.be.eql 'another string'
 
   describe 'MockApi#restore', ->
     it 'restores mocked method', ->

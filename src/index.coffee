@@ -1,49 +1,61 @@
 window.mockAsync = (object, methodName) ->
   new MockApi(object, methodName)
 
-MockApi = class
+class PublicApi
+  constructor: (@MockApi, @params = {}) ->
+
+  whenCalledWith: (args...) =>
+    new PublicApi(@MockApi, _.assign({}, @params, {args}))
+
+  shouldSucceed: (value) =>
+    params = _.assign({}, @params, {success: true, value})
+    @MockApi._addCondition(params)
+    @MockApi
+
+  shouldFail: (value) =>
+    params = _.assign({}, @params, {success: false, value})
+    @MockApi._addCondition(params)
+    @MockApi
+
+  shouldReturn: (args...) => @shouldSucceed(args...)
+
+class MockApi
+  defaultParams:
+    success: true
 
   constructor: (@object, @methodName) ->
-    @prevMethodFn = @object[@methodName]
-    @defaultCallResult = null
-    @callResultsForArgs = {}
+    @callResults = {}
+
+    ApiRoot = new PublicApi(@)
+    @[name] = ApiRoot[name] for name, func of PublicApi::
 
     @_mockMehod()
 
-  shouldReturn: (callbackOrValue) ->
-    if _.isFunction(callbackOrValue)
-      @defaultCallResult = callbackOrValue()
-    else
-      @defaultCallResult = callbackOrValue
-
-  whenCalledWith: (args...) ->
-    uniqId = @_getUniqIdForArgs(args)
-
-    shouldReturn: (callbackOrValue) =>
-      if _.isFunction(callbackOrValue)
-        @callResultsForArgs[uniqId] = callbackOrValue()
-      else
-        @callResultsForArgs[uniqId] = callbackOrValue
-
   restore: ->
-    @object[@methodName] = @prevMethodFn
+    @object[@methodName] = @prevMethodFn if @prevMethodFn
 
 # private
 
-  _mockMehod: ->
-    @object[@methodName] = _.bind(@_mockedMethod, @)
+  _addCondition: (params) ->
+    @callResults[@_getUniqIdForArgs(params.args)] = params
+    undefined
 
-  _mockedMethod: (args...) ->
-    callResult =
-      if args.length > 0
-        @callResultsForArgs[@_getUniqIdForArgs(args)] || @defaultCallResult
-      else
-        @defaultCallResult
+  _mockMehod: ->
+    @prevMethodFn = @object[@methodName]
+    @object[@methodName] = @_mockedMethod
+
+  _mockedMethod: (args...) =>
+    params = @callResults[@_getUniqIdForArgs(args)] || @callResults['default'] || @defaultParams
+    result = if _.isFunction(params?.value) then params.value() else params?.value
 
     deferred = new $.Deferred()
-    deferred.resolve(callResult)
+    if params.success
+      deferred.resolve(result)
+    else
+      deferred.reject(result)
 
   _getUniqIdForArgs: (args) ->
+    return 'default' unless args && args.length > 0
     uniqId = ''
     for arg in args
       if _.isObject(arg)
