@@ -1,7 +1,7 @@
-/*! mock-async (v0.1.1),
+/*! mock-async (v0.1.2),
  Simple one-method library for mocking asynchronous methods,
- by Sergey Shishkalov <sergeyshishkalov@gmail.com>
- Wed May 21 2014 */
+ by Sergey Shishkalov <sergeyshishkalov@gmail.com>, Alex Chrome <dify.chrome@gmail.com>
+ Wed Dec 23 2015 */
 (function() {
   var modules;
 
@@ -27,66 +27,116 @@
 }).call(this);
 
 (function() {
-  var MockApi,
+  var MockApi, PublicApi,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice;
 
   window.mockAsync = function(object, methodName) {
     return new MockApi(object, methodName);
   };
 
+  PublicApi = (function() {
+    function PublicApi(MockApi, params) {
+      this.MockApi = MockApi;
+      this.params = params != null ? params : {};
+      this.shouldReturn = __bind(this.shouldReturn, this);
+      this.shouldFail = __bind(this.shouldFail, this);
+      this.shouldSucceed = __bind(this.shouldSucceed, this);
+      this.whenCalledWith = __bind(this.whenCalledWith, this);
+    }
+
+    PublicApi.prototype.whenCalledWith = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return new PublicApi(this.MockApi, _.assign({}, this.params, {
+        args: args
+      }));
+    };
+
+    PublicApi.prototype.shouldSucceed = function(value) {
+      var params;
+      params = _.assign({}, this.params, {
+        success: true,
+        value: value
+      });
+      this.MockApi._addCondition(params);
+      return this.MockApi;
+    };
+
+    PublicApi.prototype.shouldFail = function(value) {
+      var params;
+      params = _.assign({}, this.params, {
+        success: false,
+        value: value
+      });
+      this.MockApi._addCondition(params);
+      return this.MockApi;
+    };
+
+    PublicApi.prototype.shouldReturn = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return this.shouldSucceed.apply(this, args);
+    };
+
+    return PublicApi;
+
+  })();
+
   MockApi = (function() {
-    function _Class(object, methodName) {
+    MockApi.prototype.defaultParams = {
+      success: true
+    };
+
+    function MockApi(object, methodName) {
+      var ApiRoot, func, name, _ref;
       this.object = object;
       this.methodName = methodName;
-      this.prevMethodFn = this.object[this.methodName];
-      this.defaultCallResult = null;
-      this.callResultsForArgs = {};
+      this._mockedMethod = __bind(this._mockedMethod, this);
+      this.callResults = {};
+      ApiRoot = new PublicApi(this);
+      _ref = PublicApi.prototype;
+      for (name in _ref) {
+        func = _ref[name];
+        this[name] = ApiRoot[name];
+      }
       this._mockMehod();
     }
 
-    _Class.prototype.shouldReturn = function(callbackOrValue) {
-      if (_.isFunction(callbackOrValue)) {
-        return this.defaultCallResult = callbackOrValue();
-      } else {
-        return this.defaultCallResult = callbackOrValue;
+    MockApi.prototype.restore = function() {
+      if (this.prevMethodFn) {
+        return this.object[this.methodName] = this.prevMethodFn;
       }
     };
 
-    _Class.prototype.whenCalledWith = function() {
-      var args, uniqId;
+    MockApi.prototype._addCondition = function(params) {
+      this.callResults[this._getUniqIdForArgs(params.args)] = params;
+      return void 0;
+    };
+
+    MockApi.prototype._mockMehod = function() {
+      this.prevMethodFn = this.object[this.methodName];
+      return this.object[this.methodName] = this._mockedMethod;
+    };
+
+    MockApi.prototype._mockedMethod = function() {
+      var args, deferred, params, result;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      uniqId = this._getUniqIdForArgs(args);
-      return {
-        shouldReturn: (function(_this) {
-          return function(callbackOrValue) {
-            if (_.isFunction(callbackOrValue)) {
-              return _this.callResultsForArgs[uniqId] = callbackOrValue();
-            } else {
-              return _this.callResultsForArgs[uniqId] = callbackOrValue;
-            }
-          };
-        })(this)
-      };
-    };
-
-    _Class.prototype.restore = function() {
-      return this.object[this.methodName] = this.prevMethodFn;
-    };
-
-    _Class.prototype._mockMehod = function() {
-      return this.object[this.methodName] = _.bind(this._mockedMethod, this);
-    };
-
-    _Class.prototype._mockedMethod = function() {
-      var args, callResult, deferred;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      callResult = args.length > 0 ? this.callResultsForArgs[this._getUniqIdForArgs(args)] || this.defaultCallResult : this.defaultCallResult;
+      params = this.callResults[this._getUniqIdForArgs(args)] || this.callResults['default'] || this.defaultParams;
+      result = _.isFunction(params != null ? params.value : void 0) ? params.value() : params != null ? params.value : void 0;
       deferred = new $.Deferred();
-      return deferred.resolve(callResult);
+      if (params.success) {
+        return deferred.resolve(result);
+      } else {
+        return deferred.reject(result);
+      }
     };
 
-    _Class.prototype._getUniqIdForArgs = function(args) {
+    MockApi.prototype._getUniqIdForArgs = function(args) {
       var arg, uniqId, _i, _len;
+      if (!(args && args.length > 0)) {
+        return 'default';
+      }
       uniqId = '';
       for (_i = 0, _len = args.length; _i < _len; _i++) {
         arg = args[_i];
@@ -99,7 +149,7 @@
       return uniqId;
     };
 
-    return _Class;
+    return MockApi;
 
   })();
 

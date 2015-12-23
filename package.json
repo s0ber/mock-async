@@ -1,8 +1,8 @@
 {
   "private": true,
   "name": "mock-async",
-  "version": "0.1.1",
-  "author": "Sergey Shishkalov <sergeyshishkalov@gmail.com>",
+  "version": "0.1.2",
+  "author": "Sergey Shishkalov <sergeyshishkalov@gmail.com>, Alex Chrome <dify.chrome@gmail.com>",
   "description": "Simple one-method library for mocking asynchronous methods",
   "devDependencies": {
     "coffee-script": "~1.7.1",
