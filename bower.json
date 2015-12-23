@@ -1,9 +1,10 @@
 {
   "name": "mock-async",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/s0ber/mock-async",
   "authors": [
-    "Sergey Shishkalov <sergeyshishkalov@gmail.com>"
+    "Sergey Shishkalov <sergeyshishkalov@gmail.com>",
+    "Alex Chrome <dify.chrome@gmail.com>"
   ],
   "description": "Simple one-method library for mocking asynchronous methods",
   "main": "build/mock-async.min.js",
