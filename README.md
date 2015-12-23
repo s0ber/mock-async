@@ -69,7 +69,7 @@ $.getJSON(location.pathname, page: 2).done (result) ->
 
 You can also chain different mocking rules.
 
-```
+```coffeescript
 @mockApi = mockAsync($, 'getJSON')
   .whenCalledWith(location.pathname).shouldSucceed(html: '<div class="page1"></div>')
   .whenCalledWith(location.pathname, page: 1).shouldSucceed(html: '<div class="page1"></div>')
